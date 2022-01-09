@@ -6,7 +6,7 @@ def func():
     print(img.format)
     print(img.size)
     print(img.mode)
-    img.show()
+    img.save('test.jpg')
     
     
 if __name__ == '__main__':
