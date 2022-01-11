@@ -27,7 +27,7 @@ class WatermarkEngine:
             margin_vertical: int = 30,
             side: str = 'bottom',
             color: str = 'WHITE',
-            opacity: int = '30',
+            opacity: int = 125,
             across: bool = False
     ):
         # TODO: Collect all methods here
@@ -37,8 +37,11 @@ class WatermarkEngine:
             font=self._font_list[font],
             size=font_size,
             content=watermark_content,
+            opacity=opacity
         )
-        return self._current_marked_image_obj
+        
+        # return self._current_marked_image_obj
+        return self._output_result()
     
     def _check_values(self):
         # TODO: Check if image exists
@@ -62,7 +65,7 @@ class WatermarkEngine:
         
         pass
     
-    def _create_watermark(self, font, size, content):
+    def _create_watermark(self, font, size, content, opacity):
         # TODO: Look into https://pythonhosted.org/blend_modes/
         # TODO: Also this !!!! more important https://colab.research.google.com/drive/1CJy_vzoOcQdomINNMz1TyjXLGsZLZzwF?usp=sharing
         
@@ -70,23 +73,35 @@ class WatermarkEngine:
         font = ImageFont.truetype(font, size)
         # Create new image the size of the _current_image
         watermark_image = Image.new(
-            self._current_image_colorspace,
+            "RGBA",
             (self._current_image_width, self._current_image_height),
-            "white"
+            (255, 255, 255, 0)
         )
         # Initiate class that will rasterize font on to the image
         draw_engine = ImageDraw.Draw(watermark_image)
         # Draw letters
-        draw_engine.text((self._current_image_width, self._current_image_height), content, fill="black", anchor="rd", font=font)
-        self._current_marked_image_obj = ImageChops.multiply(self._current_image_obj, watermark_image)
+        draw_engine.text(
+            (self._current_image_width, self._current_image_height),
+            content,
+            fill=(255, 255, 255, opacity),
+            anchor="rd",
+            font=font
+        )
+        # self._current_marked_image_obj = ImageChops.multiply(self._current_image_obj, watermark_image)
+        self._current_marked_image_obj = Image.alpha_composite(
+            self._current_image_obj.convert('RGBA'),
+            watermark_image
+        )
     # TODO: Translate chosen side to anchor values https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
         
         # TODO: Using predetermined parameters call for method to actually apply watermark
         pass
     
-    def _output_result(self):
+    def _output_result(self) -> Image:
         # TODO: Create function that returns modified image object
-        pass
+        final_image = self._current_marked_image_obj.convert('RGB')
+        # final_image.show()
+        return final_image
 
 
 if __name__ == '__main__':
