@@ -4,43 +4,59 @@ from PIL import Image, ImageDraw, ImageFont, ImageChops
 class WatermarkEngine:
     def __init__(self):
         self._font_list = {
-            'OpenSans': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Regular.ttf',
+            'OpenSans-Regular': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Regular.ttf',
+            'OpenSans-SemiBold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-SemiBold.ttf',
+            'OpenSans-Bold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
             'Caveat': '../fonts/ttf/Caveat/static/Caveat-Regular.ttf',
+        }
+        self.color_list = {
+            # BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO, ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
+            'BLACK': (255, 255, 255),
+            'WHITE': (0, 0, 0),
+            'GRAY': (127, 127, 127),
+            'RUBY': (191, 10, 48),
+            'PINK': (230, 0, 126),
+            'GRASS': (0, 154, 23),
+            'PISTACHIO': (180, 231, 183),
+            'ORANGE': (255, 123, 0),
+            'BLUE': (49, 99, 156),
+            'INDIGO': (0, 27, 148),
+            'PURPLE': (91, 10, 145),
+            'YELLOW': (255, 233, 0),
+            'BEIGE': (244, 226, 198),
+            'MUSTARD': (234, 170, 0)
         }
         self._current_image_obj = None
         self._current_marked_image_obj = None
         self._current_image_name = None  # path with filename in one str
-        self._current_image_path = None  # TODO: MAY BE WILL NOT NEED THAT IN THE FUTURE DEVELOPMENT
+        # self._current_image_path = None  # TODO: MAY BE WILL NOT NEED THAT IN THE FUTURE DEVELOPMENT
         self._current_image_size = None
         self._current_image_width = None
         self._current_image_height = None
         self._current_image_colorspace = None
-        # TODO: create variables for parameters
-        pass
 
     def apply_watermark(
             self, image_obj: Image,
             watermark_content: str = "KT",
-            font_size: int = 150,
-            font: str = 'OpenSans',
+            font_size: int = 250,
+            font: str = 'OpenSans-SemiBold',
             margin_horizontal: int = 30,
             margin_vertical: int = 30,
             side: str = 'bottom',
-            color: str = 'WHITE',
+            color: str = 'MUSTARD',
             opacity: int = 125,
             across: bool = False
     ):
-        # TODO: Collect all methods here
         self._current_image_obj = image_obj
         self._gather_info()
         self._create_watermark(
             font=self._font_list[font],
             size=font_size,
             content=watermark_content,
-            opacity=opacity
+            opacity=opacity,
+            color=color
         )
         
-        # return self._current_marked_image_obj
         return self._output_result()
     
     def _check_values(self):
@@ -65,10 +81,7 @@ class WatermarkEngine:
         
         pass
     
-    def _create_watermark(self, font, size, content, opacity):
-        # TODO: Look into https://pythonhosted.org/blend_modes/
-        # TODO: Also this !!!! more important https://colab.research.google.com/drive/1CJy_vzoOcQdomINNMz1TyjXLGsZLZzwF?usp=sharing
-        
+    def _create_watermark(self, font, size, content, opacity, color):
         # Initiate font class
         font = ImageFont.truetype(font, size)
         # Create new image the size of the _current_image
@@ -81,10 +94,10 @@ class WatermarkEngine:
         draw_engine = ImageDraw.Draw(watermark_image)
         # Draw letters
         draw_engine.text(
-            (self._current_image_width, self._current_image_height),
+            (int(self._current_image_width / 2), int(self._current_image_height / 2)),  # TODO: This needs to be preditermined
             content,
-            fill=(255, 255, 255, opacity),
-            anchor="rd",
+            fill=(*self.color_list[color], opacity),
+            anchor="mb",
             font=font
         )
         # self._current_marked_image_obj = ImageChops.multiply(self._current_image_obj, watermark_image)
@@ -95,7 +108,6 @@ class WatermarkEngine:
     # TODO: Translate chosen side to anchor values https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
         
         # TODO: Using predetermined parameters call for method to actually apply watermark
-        pass
     
     def _output_result(self) -> Image:
         # TODO: Create function that returns modified image object
