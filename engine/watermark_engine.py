@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont, ImageChops
+from PIL import Image, ImageDraw, ImageFont
 
 
 class WatermarkEngine:
@@ -40,9 +40,11 @@ class WatermarkEngine:
             watermark_content: str = "KT",
             font_size: int = 250,
             font: str = 'OpenSans-SemiBold',
-            margin_horizontal: int = 30,
-            margin_vertical: int = 30,
-            side: str = 'bottom',
+            alignment_vertical: str = 'BOTTOM',
+            alignment_horizontal: str = 'RIGHT',
+            margin_horizontal: int = 50,
+            margin_vertical: int = 50,
+            anchor: str = 'rd',
             color: str = 'MUSTARD',
             opacity: int = 125,
             across: bool = False
@@ -54,7 +56,8 @@ class WatermarkEngine:
             size=font_size,
             content=watermark_content,
             opacity=opacity,
-            color=color
+            color=color,
+            anchor=anchor
         )
         
         return self._output_result()
@@ -74,33 +77,55 @@ class WatermarkEngine:
         self._current_image_height = self._current_image_obj.height
         self._current_image_colorspace = self._current_image_obj.mode
     
-    def _calculate_placement(self):
+    def _calculate_placement(self, margin_h, margin_v):
+        #    left middle right
+        #   ┌─────┬─────┬─────┐
+        #   │ lt  │ mt  │ rt  │  top
+        #   ├─────┼─────┼─────┤
+        #   │ lm  │ mm  │ rm  │  middle
+        #   ├─────┼─────┼─────┤
+        #   │ ld  │ md  │ rd  │  bottom
+        #   └─────┴─────┴─────┘
         # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
         # TODO: Create a mechanism that will output exactly where to put watermark
         # TODO: based on parameters like (width and height), watermark size, font, image size
+        # (ld / lm / lt) (mt / mm / md) (rt / rm / rd)
+        # Vertical alignment: TOP MIDDLE BOTTOM
+        # Vertical margin:
+        # Horizontal alignment: LEFT MIDDLE RIGHT
+        # Horizontal margin:
+        # X - Y (width , HEIGHT)
+        top = 0 + abs(margin_v)
+        center = self._current_image_height / 2 + margin_v
+        bottom = self._current_image_height - abs(margin_v)
         
-        pass
-    
-    def _create_watermark(self, font, size, content, opacity, color):
+        left = 0 + abs(margin_h)
+        middle = self._current_image_width / 2 + margin_h
+        right = self._current_image_width - abs(margin_h)
+        
+        top_left = (top, left)
+        top_middle = (top, middle)
+        top_right = (top, right)
+        center_left = (center, left)
+        center_middle = (center, middle)
+        center_right = (center, right)
+        bottom_left = (bottom, left)
+        bottom_middle = (bottom, middle)
+        bottom_right = (bottom, right)
+        
+    def _create_watermark(self, font, size, content, opacity, color, anchor):
         # Initiate font class
         font = ImageFont.truetype(font, size)
         # Create new image the size of the _current_image
         watermark_image = Image.new(
-            "RGBA",
-            (self._current_image_width, self._current_image_height),
-            (255, 255, 255, 0)
+            "RGBA", (self._current_image_width, self._current_image_height), (255, 255, 255, 0)
         )
         # Initiate class that will rasterize font on to the image
-        draw_engine = ImageDraw.Draw(watermark_image)
-        # Draw letters
-        draw_engine.text(
-            (int(self._current_image_width / 2), int(self._current_image_height / 2)),  # TODO: This needs to be preditermined
-            content,
-            fill=(*self.color_list[color], opacity),
-            anchor="mb",
-            font=font
+        text_typist = ImageDraw.Draw(watermark_image)
+        text_typist.text(
+            (int(1000), int(300)),  # TODO: This needs to be predetermined
+            content, fill=(*self.color_list[color], opacity), anchor=anchor, font=font
         )
-        # self._current_marked_image_obj = ImageChops.multiply(self._current_image_obj, watermark_image)
         self._current_marked_image_obj = Image.alpha_composite(
             self._current_image_obj.convert('RGBA'),
             watermark_image
