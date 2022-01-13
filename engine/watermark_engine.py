@@ -34,7 +34,7 @@ class WatermarkEngine:
         self._current_img_width = None
         self._current_img_height = None
         self._current_img_colorspace = None
-
+        
         self.mark_text: str = "KT"
         self.font_size: int = 250
         self.font: str = 'OpenSans-SemiBold'
@@ -46,7 +46,57 @@ class WatermarkEngine:
         self.color: str = 'MUSTARD'
         self.opacity: int = 125
         self.across: bool = False
-
+    
+    def parameters_set(self,
+                       mark_text: str = None,
+                       font_size: int = None,
+                       font: str = None,
+                       alignment_vertical: str = None,
+                       alignment_horizontal: str = None,
+                       margin_horizontal: int = None,
+                       margin_vertical: int = None,
+                       anchor: str = None,
+                       color: str = None,
+                       opacity: int = None,
+                       across: bool = None,
+                       ):
+        if mark_text is not None:
+            self.mark_text = mark_text
+        if font_size is not None:
+            self.font_size = font_size
+        if font is not None:
+            self.font = font
+        if alignment_vertical is not None:
+            self.alignment_vertical = alignment_vertical
+        if alignment_horizontal is not None:
+            self.alignment_horizontal = alignment_horizontal
+        if margin_horizontal is not None:
+            self.margin_horizontal = margin_horizontal
+        if margin_vertical is not None:
+            self.margin_vertical = margin_vertical
+        if anchor is not None:
+            self.anchor = anchor
+        if color is not None:
+            self.color = color
+        if opacity is not None:
+            self.opacity = opacity
+        if across is not None:
+            self.across = across
+        pass
+    
+    def parameters_reset(self):
+        self.mark_text: str = ""
+        self.font_size: int = 250
+        self.font: str = 'OpenSans-SemiBold'
+        self.alignment_vertical: str = 'BOTTOM'
+        self.alignment_horizontal: str = 'RIGHT'
+        self.margin_horizontal: int = 50
+        self.margin_vertical: int = 50
+        self.anchor: str = 'rd'
+        self.color: str = 'WHITE'
+        self.opacity: int = 125
+        self.across: bool = False
+    
     def apply_watermark(
             self, image_obj: Image,
     ):
@@ -101,7 +151,7 @@ class WatermarkEngine:
         bottom_left = (bottom, left)
         bottom_middle = (bottom, middle)
         bottom_right = (bottom, right)
-        
+    
     def _create_watermark(self):
         # Initiate font class
         font = ImageFont.truetype(self._font_list[self.font], self.font_size)
@@ -117,9 +167,10 @@ class WatermarkEngine:
             font=font
         )
         self._current_mk_img_obj = Image.alpha_composite(self._current_img_obj.convert('RGBA'), mark_image)
+    
     # TODO: Translate chosen side to anchor values https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
-        
-        # TODO: Using predetermined parameters call for method to actually apply watermark
+    
+    # TODO: Using predetermined parameters call for method to actually apply watermark
     
     def _output_result(self) -> Image:
         # TODO: Create function that returns modified image object
@@ -132,6 +183,7 @@ if __name__ == '__main__':
         # READS FILE
         test_image = Image.open(file_name)
         return test_image
+    
     
     def dummy_save_file_func(file_obj: Image, file_name: 'str' = 'test_dogo.jpg'):
         # WRITES FILE
