@@ -60,6 +60,25 @@ class WatermarkEngine:
                        opacity: int = None,
                        across: bool = None,
                        ):
+        """
+        Changes one or multiple parameters.
+        
+        :param mark_text: A text to be applied as watermark (eg. Author's name, date of creation or smt. else)
+        :param font_size: Font size in pixels
+        :param font: Font name. Available 'OpenSans-Regular', 'OpenSans-SemiBold', 'OpenSans-Bold', 'Caveat
+        :param alignment_vertical: Placement on vertical axis relative to an image (TOP, CENTER, BOTTOM)
+        :param alignment_horizontal: Placement on horizontal axis relative to an image (LEFT, MIDDLE, RIGHT)
+        :param margin_horizontal: Size (in pix) of horizontal shift relative to selected horizontal_alignment.
+                                  Negative values will be applied only if alignment set to middle
+        :param margin_vertical: Size (in pix) of vertical shift relative to selected vertical_alignment
+                                  Negative values will be applied only if alignment set to center
+        :param anchor: PILLOW text property responsible for anchor point of the text
+        :param color: Font color. Available options: BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO,
+                                                     ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
+        :param opacity: Text opacity. Value from 0 to 255 (0 - completely transparent, 255 - completely opaque)
+        :param across: Bol value. Disregards positioning, and forces watermark to go diagonally across the whole image.
+                        example would be something like  TOP SECRET, CONFIDENTIAL, or EYES ONLY.
+        """
         if mark_text is not None:
             self.mark_text = mark_text
         if font_size is not None:
@@ -85,6 +104,9 @@ class WatermarkEngine:
         pass
     
     def parameters_reset(self):
+        """
+        Resets parameters to the "default" values.
+        """
         self.mark_text: str = ""
         self.font_size: int = 250
         self.font: str = 'OpenSans-SemiBold'
@@ -97,13 +119,10 @@ class WatermarkEngine:
         self.opacity: int = 125
         self.across: bool = False
     
-    def apply_watermark(
-            self, image_obj: Image,
-    ):
+    def apply_watermark(self, image_obj: Image):
         self._current_img_obj = image_obj
         self._gather_info()
         self._create_watermark()
-        
         return self._output_result()
     
     def _check_values(self):
