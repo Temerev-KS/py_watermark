@@ -9,7 +9,7 @@ class WatermarkEngine:
             'OpenSans-Bold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
             'Caveat': '../fonts/ttf/Caveat/static/Caveat-Regular.ttf',
         }
-        self.color_list = {
+        self._color_list = {
             # BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO, ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
             'BLACK': (255, 255, 255),
             'WHITE': (0, 0, 0),
@@ -26,39 +26,33 @@ class WatermarkEngine:
             'BEIGE': (244, 226, 198),
             'MUSTARD': (234, 170, 0)
         }
-        self._current_image_obj = None
-        self._current_marked_image_obj = None
-        self._current_image_name = None  # path with filename in one str
+        self._current_img_obj = None
+        self._current_mk_img_obj = None
+        self._current_img_name = None  # path with filename in one str
         # self._current_image_path = None  # TODO: MAY BE WILL NOT NEED THAT IN THE FUTURE DEVELOPMENT
-        self._current_image_size = None
-        self._current_image_width = None
-        self._current_image_height = None
-        self._current_image_colorspace = None
+        self._current_img_size = None
+        self._current_img_width = None
+        self._current_img_height = None
+        self._current_img_colorspace = None
+
+        self.mark_text: str = "KT"
+        self.font_size: int = 250
+        self.font: str = 'OpenSans-SemiBold'
+        self.alignment_vertical: str = 'BOTTOM'
+        self.alignment_horizontal: str = 'RIGHT'
+        self.margin_horizontal: int = 50
+        self.margin_vertical: int = 50
+        self.anchor: str = 'rd'
+        self.color: str = 'MUSTARD'
+        self.opacity: int = 125
+        self.across: bool = False
 
     def apply_watermark(
             self, image_obj: Image,
-            watermark_content: str = "KT",
-            font_size: int = 250,
-            font: str = 'OpenSans-SemiBold',
-            alignment_vertical: str = 'BOTTOM',
-            alignment_horizontal: str = 'RIGHT',
-            margin_horizontal: int = 50,
-            margin_vertical: int = 50,
-            anchor: str = 'rd',
-            color: str = 'MUSTARD',
-            opacity: int = 125,
-            across: bool = False
     ):
-        self._current_image_obj = image_obj
+        self._current_img_obj = image_obj
         self._gather_info()
-        self._create_watermark(
-            font=self._font_list[font],
-            size=font_size,
-            content=watermark_content,
-            opacity=opacity,
-            color=color,
-            anchor=anchor
-        )
+        self._create_watermark()
         
         return self._output_result()
     
@@ -71,11 +65,11 @@ class WatermarkEngine:
         pass
     
     def _gather_info(self):
-        self._current_image_name = self._current_image_obj.filename
-        self._current_image_size = self._current_image_obj.size
-        self._current_image_width = self._current_image_obj.width
-        self._current_image_height = self._current_image_obj.height
-        self._current_image_colorspace = self._current_image_obj.mode
+        self._current_img_name = self._current_img_obj.filename
+        self._current_img_size = self._current_img_obj.size
+        self._current_img_width = self._current_img_obj.width
+        self._current_img_height = self._current_img_obj.height
+        self._current_img_colorspace = self._current_img_obj.mode
     
     def _calculate_placement(self, margin_h, margin_v):
         #    left middle right
@@ -89,19 +83,14 @@ class WatermarkEngine:
         # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
         # TODO: Create a mechanism that will output exactly where to put watermark
         # TODO: based on parameters like (width and height), watermark size, font, image size
-        # (ld / lm / lt) (mt / mm / md) (rt / rm / rd)
-        # Vertical alignment: TOP MIDDLE BOTTOM
-        # Vertical margin:
-        # Horizontal alignment: LEFT MIDDLE RIGHT
-        # Horizontal margin:
         # X - Y (width , HEIGHT)
         top = 0 + abs(margin_v)
-        center = self._current_image_height / 2 + margin_v
-        bottom = self._current_image_height - abs(margin_v)
+        center = self._current_img_height / 2 + margin_v
+        bottom = self._current_img_height - abs(margin_v)
         
         left = 0 + abs(margin_h)
-        middle = self._current_image_width / 2 + margin_h
-        right = self._current_image_width - abs(margin_h)
+        middle = self._current_img_width / 2 + margin_h
+        right = self._current_img_width - abs(margin_h)
         
         top_left = (top, left)
         top_middle = (top, middle)
@@ -113,31 +102,28 @@ class WatermarkEngine:
         bottom_middle = (bottom, middle)
         bottom_right = (bottom, right)
         
-    def _create_watermark(self, font, size, content, opacity, color, anchor):
+    def _create_watermark(self):
         # Initiate font class
-        font = ImageFont.truetype(font, size)
-        # Create new image the size of the _current_image
-        watermark_image = Image.new(
-            "RGBA", (self._current_image_width, self._current_image_height), (255, 255, 255, 0)
-        )
+        font = ImageFont.truetype(self._font_list[self.font], self.font_size)
+        # Create a new image the size of the _current_image
+        mark_image = Image.new("RGBA", (self._current_img_width, self._current_img_height), (255, 255, 255, 0))
         # Initiate class that will rasterize font on to the image
-        text_typist = ImageDraw.Draw(watermark_image)
+        text_typist = ImageDraw.Draw(mark_image)
         text_typist.text(
             (int(1000), int(300)),  # TODO: This needs to be predetermined
-            content, fill=(*self.color_list[color], opacity), anchor=anchor, font=font
+            self.mark_text,
+            fill=(*self._color_list[self.color], self.opacity),
+            anchor=self.anchor,
+            font=font
         )
-        self._current_marked_image_obj = Image.alpha_composite(
-            self._current_image_obj.convert('RGBA'),
-            watermark_image
-        )
+        self._current_mk_img_obj = Image.alpha_composite(self._current_img_obj.convert('RGBA'), mark_image)
     # TODO: Translate chosen side to anchor values https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
         
         # TODO: Using predetermined parameters call for method to actually apply watermark
     
     def _output_result(self) -> Image:
         # TODO: Create function that returns modified image object
-        final_image = self._current_marked_image_obj.convert('RGB')
-        # final_image.show()
+        final_image = self._current_mk_img_obj.convert('RGB')
         return final_image
 
 
