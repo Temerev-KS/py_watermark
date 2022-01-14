@@ -29,7 +29,6 @@ class WatermarkEngine:
         self._current_img_obj = None
         self._current_mk_img_obj = None
         self._current_img_name = None  # path with filename in one str
-        # self._current_image_path = None  # TODO: MAY BE WILL NOT NEED THAT IN THE FUTURE DEVELOPMENT
         self._current_img_size = None
         self._current_img_width = None
         self._current_img_height = None
@@ -38,9 +37,9 @@ class WatermarkEngine:
         self.mark_text: str = "KT"
         self.font_size: int = 250
         self.font: str = 'OpenSans-SemiBold'
-        self.alignment_vertical: str = 'BOTTOM'
-        self.alignment_horizontal: str = 'RIGHT'
-        self.margin_horizontal: int = 50
+        self.alignment_vertical: str = 'bottom'
+        self.alignment_horizontal: str = 'right'
+        self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
         self.anchor: str = 'rd'
         self.color: str = 'MUSTARD'
@@ -110,9 +109,9 @@ class WatermarkEngine:
         self.mark_text: str = ""
         self.font_size: int = 250
         self.font: str = 'OpenSans-SemiBold'
-        self.alignment_vertical: str = 'BOTTOM'
-        self.alignment_horizontal: str = 'RIGHT'
-        self.margin_horizontal: int = 50
+        self.alignment_vertical: str = 'bottom'
+        self.alignment_horizontal: str = 'right'
+        self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
         self.anchor: str = 'rd'
         self.color: str = 'WHITE'
@@ -131,6 +130,9 @@ class WatermarkEngine:
         # TODO: Check if image size is no smaller then watermark
         # TODO: Check if parameters passed are actually correct (font, font size, margins, dont color, opacity)
         # TODO: Check if watermark will fit into image width and specified margin
+        
+        # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
+
         pass
     
     def _gather_info(self):
@@ -140,36 +142,60 @@ class WatermarkEngine:
         self._current_img_height = self._current_img_obj.height
         self._current_img_colorspace = self._current_img_obj.mode
     
-    def _calculate_placement(self, margin_h, margin_v):
+    def _calculate_placement(self) -> (int, int):
+        """
+        Calculates placement of the watermark based on the chosen anchor and current image dimensions
+        :return: (int, int) X Y coordinate
+        """
         #    left middle right
         #   ┌─────┬─────┬─────┐
         #   │ lt  │ mt  │ rt  │  top
         #   ├─────┼─────┼─────┤
-        #   │ lm  │ mm  │ rm  │  middle
+        #   │ lm  │ mm  │ rm  │  center
         #   ├─────┼─────┼─────┤
         #   │ ld  │ md  │ rd  │  bottom
         #   └─────┴─────┴─────┘
-        # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
-        # TODO: Create a mechanism that will output exactly where to put watermark
-        # TODO: based on parameters like (width and height), watermark size, font, image size
-        # X - Y (width , HEIGHT)
-        top = 0 + abs(margin_v)
-        center = self._current_img_height / 2 + margin_v
-        bottom = self._current_img_height - abs(margin_v)
         
-        left = 0 + abs(margin_h)
-        middle = self._current_img_width / 2 + margin_h
-        right = self._current_img_width - abs(margin_h)
+        # Each function calculates coordinate (x or y) and sets PIL anchor accordingly
+        # https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
+        def top():
+            self.anchor.replace(self.anchor[1], 't', 1)
+            return 0 + abs(self.margin_vertical)
         
-        top_left = (top, left)
-        top_middle = (top, middle)
-        top_right = (top, right)
-        center_left = (center, left)
-        center_middle = (center, middle)
-        center_right = (center, right)
-        bottom_left = (bottom, left)
-        bottom_middle = (bottom, middle)
-        bottom_right = (bottom, right)
+        def center():
+            self.anchor.replace(self.anchor[1], 'm', 1)
+            return self._current_img_height / 2 + self.margin_vertical
+        
+        def bottom():
+            self.anchor.replace(self.anchor[1], 'd', 1)
+            return self._current_img_height - abs(self.margin_vertical)
+        
+        def left():
+            self.anchor.replace(self.anchor[0], 'l', 1)
+            return 0 + abs(self.margin_horizontal)
+        
+        def middle():
+            self.anchor.replace(self.anchor[0], 'm', 1)
+            return self._current_img_width / 2 + self.margin_horizontal
+        
+        def right():
+            self.anchor.replace(self.anchor[0], 'r', 1)
+            return self._current_img_width - abs(self.margin_horizontal)
+        
+        # Store functions to call them later using string
+        alignments_vertical = {
+            'top': top,
+            'center': center,
+            'bottom': bottom,
+        }
+        alignments_horizontal = {
+            'left': left,
+            'middle': middle,
+            'right': right
+        }
+        # Construct tuple of X,Y coordinates using calls to stored functions
+        placement = alignments_horizontal[self.alignment_horizontal](), alignments_vertical[self.alignment_vertical]()
+        return placement
     
     def _create_watermark(self):
         # Initiate font class
@@ -179,17 +205,13 @@ class WatermarkEngine:
         # Initiate class that will rasterize font on to the image
         text_typist = ImageDraw.Draw(mark_image)
         text_typist.text(
-            (int(1000), int(300)),  # TODO: This needs to be predetermined
+            self._calculate_placement(),
             self.mark_text,
             fill=(*self._color_list[self.color], self.opacity),
             anchor=self.anchor,
             font=font
         )
         self._current_mk_img_obj = Image.alpha_composite(self._current_img_obj.convert('RGBA'), mark_image)
-    
-    # TODO: Translate chosen side to anchor values https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
-    
-    # TODO: Using predetermined parameters call for method to actually apply watermark
     
     def _output_result(self) -> Image:
         # TODO: Create function that returns modified image object
