@@ -34,16 +34,16 @@ class WatermarkEngine:
         self._current_img_height = None
         self._current_img_colorspace = None
         self._current_watermark_placement = None
+        self._current_anchor: str = 'xx'
         
         self.mark_text: str = "BIG BAD WOLF"
         self.font_size: int = 250
         self.font: str = 'OpenSans-SemiBold'
-        self.alignment_vertical: str = 'top'
+        self.alignment_vertical: str = 'center'
         self.alignment_horizontal: str = 'middle'
         self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
-        self.anchor: str = 'xx'
-        self.color: str = 'WHITE'
+        self.color: str = 'PISTACHIO'
         self.opacity: int = 125
         self.across: bool = False
     
@@ -94,7 +94,7 @@ class WatermarkEngine:
         if margin_vertical is not None:
             self.margin_vertical = margin_vertical
         if anchor is not None:
-            self.anchor = anchor
+            self._current_anchor = anchor
         if color is not None:
             self.color = color
         if opacity is not None:
@@ -114,7 +114,7 @@ class WatermarkEngine:
         self.alignment_horizontal: str = 'right'
         self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
-        self.anchor: str = 'rd'
+        self._current_anchor: str = 'rd'
         self.color: str = 'WHITE'
         self.opacity: int = 125
         self.across: bool = False
@@ -161,27 +161,27 @@ class WatermarkEngine:
         # Each function calculates coordinate (x or y) and sets PIL anchor accordingly
         # https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
         def top():
-            self.anchor = self.anchor.replace(self.anchor[1], 't', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 't', 1)
             return 0 + abs(self.margin_vertical)
         
         def center():
-            self.anchor = self.anchor.replace(self.anchor[1], 'm', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 'm', 1)
             return self._current_img_height / 2 + self.margin_vertical
         
         def bottom():
-            self.anchor = self.anchor.replace(self.anchor[1], 'd', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 'd', 1)
             return self._current_img_height - abs(self.margin_vertical)
         
         def left():
-            self.anchor = self.anchor.replace(self.anchor[0], 'l', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'l', 1)
             return 0 + abs(self.margin_horizontal)
         
         def middle():
-            self.anchor = self.anchor.replace(self.anchor[0], 'm', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'm', 1)
             return self._current_img_width / 2 + self.margin_horizontal
         
         def right():
-            self.anchor = self.anchor.replace(self.anchor[0], 'r', 1)
+            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'r', 1)
             return self._current_img_width - abs(self.margin_horizontal)
         
         # Store functions to call them later using string
@@ -212,7 +212,7 @@ class WatermarkEngine:
             self._current_watermark_placement,
             self.mark_text,
             fill=(*self._color_list[self.color], self.opacity),
-            anchor=self.anchor,
+            anchor=self._current_anchor,
             font=font_obj
         )
         appropriate_colorspace_img_obj = self._current_img_obj.convert('RGBA')
