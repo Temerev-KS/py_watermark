@@ -43,7 +43,7 @@ class WatermarkEngine:
         self.alignment_horizontal: str = 'middle'
         self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
-        self.color: str = 'PISTACHIO'
+        self.color: str = 'BLACK'
         self.opacity: int = 125
         self.across: bool = False
     
@@ -129,7 +129,14 @@ class WatermarkEngine:
     
     def _check_values(self):
         # TODO: Check if image exists
+        # AttributeError: 'NoneType' object has no attribute 'filename'
+        # FileNotFoundError: [Errno 2] No such file or directory: 'file_name'
+        # PIL.UnidentifiedImageError: cannot identify image file '../img/dogo_og.7z'
+        
         # TODO: Check if image has correct colorspace
+        # If FIle in CMYK and ICC is discarded or baked- colors will be off to a green/yellow'ish hue
+        # If File was converted to CMYK with PIL.Image.convert - converting int back to RGB will yield a good resold
+        #
         # TODO: Check if image size is no smaller then watermark
         # TODO: Check if parameters passed are actually correct (font, font size, margins, dont color, opacity)
         # TODO: Check if watermark will fit into image width and specified margin
@@ -226,7 +233,8 @@ class WatermarkEngine:
 if __name__ == '__main__':
     def dummy_file_func(file_name='../img/dogo.jpeg') -> Image:
         # READS FILE
-        test_image = Image.open(file_name)
+        # test_image = Image.open(file_name)
+        test_image = Image.open('C:\python_projects\py_watermark\img\dogo_cmyk_PILL.jpeg')
         return test_image
     
     
