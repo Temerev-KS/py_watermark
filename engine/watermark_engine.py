@@ -136,10 +136,15 @@ class WatermarkEngine:
         # TODO: Check if image has correct colorspace
         # If FIle in CMYK and ICC is discarded or baked- colors will be off to a green/yellow'ish hue
         # If File was converted to CMYK with PIL.Image.convert - converting int back to RGB will yield a good resold
-        #
-        # TODO: Check if image size is no smaller then watermark
-        # TODO: Check if parameters passed are actually correct (font, font size, margins, dont color, opacity)
+        # Temporary solution is to convert image anyway, but this is something that has to be improved in the future
+        # May LOG that file as something that needs to be checked after conversion
+        # TODO: Check if parameters passed are actually correct (font, font size, margins, font color, opacity)
+        # May be better solution would be to pre check some parameters before launching apply method
+        # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
+        # And if it does not? What?
+        # Options: Skip it  |  Reduce the size of the watermark temporary for one file  |  Continue anyway  |
+        # Continue and log it
         
         # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
 
