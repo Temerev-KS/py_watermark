@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 
 class WatermarkEngine:
@@ -26,15 +26,15 @@ class WatermarkEngine:
             'BEIGE': (244, 226, 198),
             'MUSTARD': (234, 170, 0)
         }
-        self._current_img_obj = None
-        self._current_mk_img_obj = None
-        self._current_img_name = None  # path with filename in one str
-        self._current_img_size = None
-        self._current_img_width = None
-        self._current_img_height = None
-        self._current_img_colorspace = None
-        self._current_watermark_placement = None
-        self._current_anchor: str = 'xx'
+        self._img_obj = None
+        self._marked_img_obj = None
+        self._img_name = None  # path with filename in one str
+        self._img_size = None
+        self._img_width = None
+        self._img_height = None
+        self._img_colorspace = None
+        self._watermark_placement = None
+        self._anchor: str = 'mm'
         
         self.mark_text: str = "BIG BAD WOLF"
         self.font_size: int = 250
@@ -94,7 +94,7 @@ class WatermarkEngine:
         if margin_vertical is not None:
             self.margin_vertical = margin_vertical
         if anchor is not None:
-            self._current_anchor = anchor
+            self._anchor = anchor
         if color is not None:
             self.color = color
         if opacity is not None:
@@ -114,25 +114,26 @@ class WatermarkEngine:
         self.alignment_horizontal: str = 'right'
         self.margin_horizontal: int = 100
         self.margin_vertical: int = 50
-        self._current_anchor: str = 'rd'
+        self._anchor: str = 'mm'
         self.color: str = 'WHITE'
         self.opacity: int = 125
         self.across: bool = False
     
     def apply_watermark(self, image_obj: Image):
-        self._current_img_obj = image_obj
-        self._check_values()
-        self._gather_info()
-        self._calculate_placement()
-        self._create_watermark()
-        return self._output_result()
+        if image_obj is None:  # If we've been passed any object to work with - continue, else skip this one
+            pass
+        else:
+            self._img_obj = image_obj
+            self._check_values()
+            try:
+                self._gather_info()
+            except (FileNotFoundError, UnidentifiedImageError):  # If file not found or has unexpected format - skip
+                return
+            self._calculate_placement()
+            self._create_watermark()
+            return self._output_result()
     
     def _check_values(self):
-        # TODO: Check if image exists
-        # AttributeError: 'NoneType' object has no attribute 'filename'
-        # FileNotFoundError: [Errno 2] No such file or directory: 'file_name'
-        # PIL.UnidentifiedImageError: cannot identify image file '../img/dogo_og.7z'
-        
         # TODO: Check if image has correct colorspace
         # If FIle in CMYK and ICC is discarded or baked- colors will be off to a green/yellow'ish hue
         # If File was converted to CMYK with PIL.Image.convert - converting int back to RGB will yield a good resold
@@ -151,11 +152,11 @@ class WatermarkEngine:
         pass
     
     def _gather_info(self):
-        self._current_img_name = self._current_img_obj.filename
-        self._current_img_size = self._current_img_obj.size
-        self._current_img_width = self._current_img_obj.width
-        self._current_img_height = self._current_img_obj.height
-        self._current_img_colorspace = self._current_img_obj.mode
+        self._img_name = self._img_obj.filename
+        self._img_size = self._img_obj.size
+        self._img_width = self._img_obj.width
+        self._img_height = self._img_obj.height
+        self._img_colorspace = self._img_obj.mode
     
     def _calculate_placement(self):
         """
@@ -173,28 +174,28 @@ class WatermarkEngine:
         # Each function calculates coordinate (x or y) and sets PIL anchor accordingly
         # https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
         def top():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 't', 1)
+            self._anchor = self._anchor.replace(self._anchor[1], 't', 1)
             return 0 + abs(self.margin_vertical)
         
         def center():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 'm', 1)
-            return self._current_img_height / 2 + self.margin_vertical
+            self._anchor = self._anchor.replace(self._anchor[1], 'm', 1)
+            return self._img_height / 2 + self.margin_vertical
         
         def bottom():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[1], 'd', 1)
-            return self._current_img_height - abs(self.margin_vertical)
+            self._anchor = self._anchor.replace(self._anchor[1], 'd', 1)
+            return self._img_height - abs(self.margin_vertical)
         
         def left():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'l', 1)
+            self._anchor = self._anchor.replace(self._anchor[0], 'l', 1)
             return 0 + abs(self.margin_horizontal)
         
         def middle():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'm', 1)
-            return self._current_img_width / 2 + self.margin_horizontal
+            self._anchor = self._anchor.replace(self._anchor[0], 'm', 1)
+            return self._img_width / 2 + self.margin_horizontal
         
         def right():
-            self._current_anchor = self._current_anchor.replace(self._current_anchor[0], 'r', 1)
-            return self._current_img_width - abs(self.margin_horizontal)
+            self._anchor = self._anchor.replace(self._anchor[0], 'r', 1)
+            return self._img_width - abs(self.margin_horizontal)
         
         # Store functions to call them later using string
         alignments_vertical = {
@@ -208,7 +209,7 @@ class WatermarkEngine:
             'right': right
         }
         # Construct tuple of X,Y coordinates using calls to stored functions
-        self._current_watermark_placement = (
+        self._watermark_placement = (
             alignments_horizontal[self.alignment_horizontal](),
             alignments_vertical[self.alignment_vertical]()
         )
@@ -217,21 +218,21 @@ class WatermarkEngine:
         # Initiate font class
         font_obj = ImageFont.truetype(self._font_list[self.font], self.font_size)
         # Create a new image the size of the _current_image
-        mark_image = Image.new("RGBA", (self._current_img_width, self._current_img_height), (255, 255, 255, 0))
+        mark_image = Image.new("RGBA", (self._img_width, self._img_height), (255, 255, 255, 0))
         # Initiate class that will rasterize font on to the image
         text_typist = ImageDraw.Draw(mark_image)
         text_typist.text(
-            self._current_watermark_placement,
+            self._watermark_placement,
             self.mark_text,
             fill=(*self._color_list[self.color], self.opacity),
-            anchor=self._current_anchor,
+            anchor=self._anchor,
             font=font_obj
         )
-        appropriate_colorspace_img_obj = self._current_img_obj.convert('RGBA')
-        self._current_mk_img_obj = Image.alpha_composite(appropriate_colorspace_img_obj, mark_image)
+        appropriate_colorspace_img_obj = self._img_obj.convert('RGBA')
+        self._marked_img_obj = Image.alpha_composite(appropriate_colorspace_img_obj, mark_image)
     
     def _output_result(self) -> Image:
-        final_rgb_image = self._current_mk_img_obj.convert('RGB')
+        final_rgb_image = self._marked_img_obj.convert('RGB')
         return final_rgb_image
 
 
