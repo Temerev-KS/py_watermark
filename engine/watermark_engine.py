@@ -9,6 +9,7 @@ class WatermarkEngine:
             'OpenSans-Bold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
             'Caveat': '../fonts/ttf/Caveat/static/Caveat-Regular.ttf',
         }
+        # TODO: Create FontLibrary class in witch all fonts should be processed and ready to go after program is loaded
         self._color_list = {
             # BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO, ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
             'BLACK': (0, 0, 0),
@@ -124,11 +125,11 @@ class WatermarkEngine:
             pass
         else:
             self._img_obj = image_obj
-            self._check_values()
             try:
                 self._gather_info()
             except (FileNotFoundError, UnidentifiedImageError):  # If file not found or has unexpected format - skip
                 return
+            self._check_values()
             self._calculate_placement()
             self._create_watermark()
             return self._output_result()
@@ -143,6 +144,16 @@ class WatermarkEngine:
         # May be better solution would be to pre check some parameters before launching apply method
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
+
+        current_font = ImageFont.truetype(self._font_list[self.font], self.font_size)  # TODO: This should be just a selection from FontLibrarry
+        sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))  # TODO: This should be initiated once in the init
+        measure_image = ImageDraw.Draw(sample_image)  # TODO: This should be initiated once in the init
+        text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font, spacing=400)
+        text_width = text_bounding_box[2] - text_bounding_box[0]
+        text_height = text_bounding_box[3] - text_bounding_box[1]
+        if text_width + self.margin_horizontal > self._img_width or text_height > self._img_width + self.margin_horizontal:
+            print('watermark is too big')
+            
         # And if it does not? What?
         # Options: Skip it  |  Reduce the size of the watermark temporary for one file  |  Continue anyway  |
         # Continue and log it
