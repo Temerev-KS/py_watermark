@@ -1,4 +1,5 @@
 from PIL import Image
+from fonts import FontsLibrary
 
 
 def func():
@@ -11,5 +12,9 @@ def func():
     
     
 if __name__ == '__main__':
-    func()
+    # func()
+    pil_fonts = FontsLibrary()
+    print(pil_fonts.get_fonts_list())
+    for key, value in pil_fonts.get_fonts_list().items():
+        print(key, value)
     

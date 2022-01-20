@@ -140,7 +140,7 @@ class WatermarkEngine:
         # If File was converted to CMYK with PIL.Image.convert - converting int back to RGB will yield a good resold
         # Temporary solution is to convert image anyway, but this is something that has to be improved in the future
         # May LOG that file as something that needs to be checked after conversion
-        # TODO: Check if parameters passed are actually correct (font, font size, margins, font color, opacity)
+        # TODO: Check if parameters passed are actually correct (font, font size, margins, font color, opacity, no "\n" characters)
         # May be better solution would be to pre check some parameters before launching apply method
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
@@ -149,6 +149,7 @@ class WatermarkEngine:
         sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))  # TODO: This should be initiated once in the init
         measure_image = ImageDraw.Draw(sample_image)  # TODO: This should be initiated once in the init
         text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font, spacing=400)
+        print(current_font.font)
         text_width = text_bounding_box[2] - text_bounding_box[0]
         text_height = text_bounding_box[3] - text_bounding_box[1]
         if text_width + self.margin_horizontal > self._img_width or text_height > self._img_width + self.margin_horizontal:
