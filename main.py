@@ -14,7 +14,7 @@ def func():
 if __name__ == '__main__':
     # func()
     pil_fonts = FontsLibrary()
-    print(pil_fonts.get_fonts_list())
-    for key, value in pil_fonts.get_fonts_list().items():
-        print(key, value)
+    print(pil_fonts.get_fonts_names_tuple())
+    for key in pil_fonts.get_fonts_names_tuple():
+        print(key)
     
