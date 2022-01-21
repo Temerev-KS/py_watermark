@@ -32,16 +32,18 @@ class WatermarkEngine:
         self._watermark_placement = None
         self._anchor: str = 'mm'
         
-        self.mark_text: str = "BIG BAD WOLF"
-        self.font_size: int = 250
-        self.font: str = 'Open Sans SemiBold'
-        self.alignment_vertical: str = 'center'
-        self.alignment_horizontal: str = 'middle'
-        self.margin_horizontal: int = 100
-        self.margin_vertical: int = 50
-        self.color: str = 'BLACK'
-        self.opacity: int = 125
+        self.mark_text: str = ''
+        self.font_size: int = 0
+        self.font: str = ''
+        self.alignment_vertical: str = ''
+        self.alignment_horizontal: str = ''
+        self.margin_horizontal: int = 0
+        self.margin_vertical: int = 0
+        self.color: str = ''
+        self.opacity: int = 0
         self.across: bool = False
+        
+        self.parameters_reset()
     
     def parameters_set(self,
                        mark_text: str = None,
