@@ -1,4 +1,3 @@
-import sys
 from PIL import ImageFont
 from pathlib import Path
 from fontTools import ttLib
@@ -18,23 +17,20 @@ class FontsLibrary:
             self.fonts_list[self.read_font_name(font_file)] = ImageFont.truetype(font=font_file.resolve().__str__())
     
     @staticmethod
-    def read_font_name(some_font_file):
-        font_specifier_name_id = 4
-        
-        def short_name(font):
-            """Get the short name from the font's names table"""
-            name = ""
-            for record in font['name'].names:
-                if b'\x00' in record.string:
-                    name_str = record.string.decode('utf-16-be')
-                else:
-                    name_str = record.string.decode('utf-8')
-                if record.nameID == font_specifier_name_id and not name:
-                    name = name_str
-            return name
-        tt = ttLib.TTFont(some_font_file)
-        font_name = short_name(tt)
-        return font_name
+    def read_font_name(font_file_path) -> str:
+        # Read the font name from the font's file names table
+        font_file = ttLib.TTFont(font_file_path)
+        font_name_str = ""
+        for record in font_file['name'].names:
+            # determine what encoding table to use based
+            if b'\x00' in record.string:
+                name_str = record.string.decode('utf-16-be')
+            else:
+                name_str = record.string.decode('utf-8')
+            # locate font name based on specifier name id (4)
+            if record.nameID == 4 and not font_name_str:
+                font_name_str = name_str
+        return font_name_str
     
     def get_fonts_list(self):
         return self.fonts_list
