@@ -31,7 +31,8 @@ class FontsLibrary:
         
         for font_file in fonts_folder.rglob('*.ttf'):
             # Reed and store font in dictionary {'Font name'; ImageFont_object}
-            self._fonts[read_font_name(font_file)] = ImageFont.truetype(font=str(font_file))
+            font_name_key = read_font_name(font_file)
+            self._fonts[font_name_key] = ImageFont.truetype(font=str(font_file))
     
     def get_fonts_names_tuple(self):
         fonts_names = tuple(key for key in self._fonts.keys())

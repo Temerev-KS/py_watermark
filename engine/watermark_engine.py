@@ -1,15 +1,10 @@
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from fonts import FontsLibrary
 
 
 class WatermarkEngine:
     def __init__(self):
-        self._font_list = {
-            'OpenSans-Regular': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Regular.ttf',
-            'OpenSans-SemiBold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-SemiBold.ttf',
-            'OpenSans-Bold': '../fonts/ttf/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
-            'Caveat': '../fonts/ttf/Caveat/static/Caveat-Regular.ttf',
-        }
-        # TODO: Create FontLibrary class in witch all fonts should be processed and ready to go after program is loaded
+        self.font_library = FontsLibrary()
         self._color_list = {
             # BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO, ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
             'BLACK': (0, 0, 0),
@@ -39,7 +34,7 @@ class WatermarkEngine:
         
         self.mark_text: str = "BIG BAD WOLF"
         self.font_size: int = 250
-        self.font: str = 'OpenSans-SemiBold'
+        self.font: str = 'Open Sans SemiBold'
         self.alignment_vertical: str = 'center'
         self.alignment_horizontal: str = 'middle'
         self.margin_horizontal: int = 100
@@ -110,7 +105,7 @@ class WatermarkEngine:
         """
         self.mark_text: str = ""
         self.font_size: int = 250
-        self.font: str = 'OpenSans-SemiBold'
+        self.font: str = 'Open Sans SemiBold'
         self.alignment_vertical: str = 'bottom'
         self.alignment_horizontal: str = 'right'
         self.margin_horizontal: int = 100
@@ -145,11 +140,11 @@ class WatermarkEngine:
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
 
-        current_font = ImageFont.truetype(self._font_list[self.font], self.font_size)  # TODO: This should be just a selection from FontLibrarry
+        current_font = self.font_library.get_selected_font(self.font)
+        current_font.size = self.font_size
         sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))  # TODO: This should be initiated once in the init
         measure_image = ImageDraw.Draw(sample_image)  # TODO: This should be initiated once in the init
         text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font, spacing=400)
-        print(current_font.font)
         text_width = text_bounding_box[2] - text_bounding_box[0]
         text_height = text_bounding_box[3] - text_bounding_box[1]
         if text_width + self.margin_horizontal > self._img_width or text_height > self._img_width + self.margin_horizontal:
@@ -227,8 +222,9 @@ class WatermarkEngine:
         )
     
     def _create_watermark(self):
-        # Initiate font class
-        font_obj = ImageFont.truetype(self._font_list[self.font], self.font_size)
+        # Load the font and specify font size
+        font = self.font_library.get_selected_font(self.font)
+        font.size = self.font_size
         # Create a new image the size of the _current_image
         mark_image = Image.new("RGBA", (self._img_width, self._img_height), (255, 255, 255, 0))
         # Initiate class that will rasterize font on to the image
@@ -238,7 +234,7 @@ class WatermarkEngine:
             self.mark_text,
             fill=(*self._color_list[self.color], self.opacity),
             anchor=self._anchor,
-            font=font_obj
+            font=font
         )
         appropriate_colorspace_img_obj = self._img_obj.convert('RGBA')
         self._marked_img_obj = Image.alpha_composite(appropriate_colorspace_img_obj, mark_image)
