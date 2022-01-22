@@ -4,13 +4,15 @@ from fontTools import ttLib
 
 
 class FontsLibrary:
+    """Responsible for reading ttf files, getting names of the fonts, storing them for future retrieval.
+    Can return "list" (tuple) of font names. Or using font name can create and return an ImageFont object"""
     def __init__(self):
         self._fonts = None
         self.load_fonts_library()
     
     def load_fonts_library(self):
         """Crawls fonts folder, if .ttf font file found -
-        processes it and stores it in dictionary {'Font name'; ImageFont_object}"""
+        processes it and stores it in dictionary {'Font name'; 'path to font file'}"""
         fonts_folder = Path("fonts")
         self._fonts = dict()
         
@@ -30,16 +32,23 @@ class FontsLibrary:
             return font_name_str
         
         for font_file in fonts_folder.rglob('*.ttf'):
-            # Reed and store font in dictionary {'Font name'; ImageFont_object}
+            # Reed and store font in dictionary {'Font name'; 'path to font file'}
             font_name_key = read_font_name(font_file)
-            self._fonts[font_name_key] = ImageFont.truetype(font=str(font_file))
+            self._fonts[font_name_key] = str(font_file)
     
-    def get_fonts_names_tuple(self):
+    def get_fonts_names_tuple(self) -> (str, str,):
+        """
+        :return: tuple of all available font names, each name is a string
+        """
         fonts_names = tuple(key for key in self._fonts.keys())
         return fonts_names
     
-    def get_selected_font(self, font_name: str) -> ImageFont:
-        font_obj = self._fonts[font_name]
+    def get_selected_font(self, font_name: str, font_size: int = 42) -> ImageFont:
+        """
+        Reads font files and returns ImageFont object of specified size.
+        """
+        font_file = self._fonts[font_name]
+        font_obj = ImageFont.truetype(font_file, font_size)
         return font_obj
 
 
