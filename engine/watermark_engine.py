@@ -128,14 +128,34 @@ class WatermarkEngine:
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
     
-        current_font = self.font_library.get_selected_font(self.font, self.font_size)
-        sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
-        measure_image = ImageDraw.Draw(sample_image)
-        text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font, spacing=400)
-        text_width = text_bounding_box[2] - text_bounding_box[0] + self.margin_horizontal
-        text_height = text_bounding_box[3] - text_bounding_box[1] + self.margin_vertical
-        if text_width > self._img_width or text_height > self._img_width:
-            print('watermark is too big')
+        # current_font = self.font_library.get_selected_font(self.font, self.font_size)
+        # sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
+        # measure_image = ImageDraw.Draw(sample_image)
+        # text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font)
+        # text_width = text_bounding_box[2] - text_bounding_box[0] + self.margin_horizontal
+        # text_height = text_bounding_box[3] - text_bounding_box[1] + self.margin_vertical
+        # if text_width > self._img_width or text_height > self._img_width:
+        #     print('watermark is too big')
+        
+        def check_watermark_fit():
+            current_font = self.font_library.get_selected_font(self.font, self.font_size)
+            sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
+            measure_image = ImageDraw.Draw(sample_image)
+            text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font)
+            text_width = text_bounding_box[2] - text_bounding_box[0] + self.margin_horizontal
+            text_height = text_bounding_box[3] - text_bounding_box[1] + self.margin_vertical
+            if self._anchor in ('lt', 'rt', 'ld', 'rd', 'mm'):
+                check_result = text_width > self._img_width or text_height > self._img_height
+            elif self._anchor in ('mt', 'md'):
+                check_result = text_width > (self._img_width / 2) or text_height > self._img_width
+            elif self._anchor in ('lm', 'rm'):
+                check_result = text_width > self._img_width or (text_height / 2) > self._img_height
+            else:
+                check_result = True
+            if check_result is True:
+                print('Watermark is too big for that image')
+        
+        check_watermark_fit()
             
         # And if it does not? What?
         # Options: Skip it  |  Reduce the size of the watermark temporary for one file  |  Continue anyway  |
