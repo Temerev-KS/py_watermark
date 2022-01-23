@@ -37,16 +37,12 @@ class FontsLibrary:
             self._fonts[font_name_key] = str(font_file)
     
     def get_fonts_names_tuple(self) -> (str, str,):
-        """
-        :return: tuple of all available font names, each name is a string
-        """
+        """Returns tuple of all available font names, each name is a string"""
         fonts_names = tuple(key for key in self._fonts.keys())
         return fonts_names
     
     def get_selected_font(self, font_name: str, font_size: int = 42) -> ImageFont:
-        """
-        Reads font files and returns ImageFont object of specified size.
-        """
+        """Reads font file of specified font name and returns ImageFont object of specified size."""
         font_file = self._fonts[font_name]
         font_obj = ImageFont.truetype(font_file, font_size)
         return font_obj

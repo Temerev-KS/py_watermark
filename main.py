@@ -5,7 +5,6 @@ from watermark_engine import WatermarkEngine
 
 def func():
     img = Image.open('img/dogo.jpeg')
-    img = Image.open('img/dogo.jpeg')
     print(img.format)
     print(img.size)
     print(img.mode)
@@ -20,10 +19,9 @@ def fonts_test():
     
     
 def engine_test():
-    def dummy_file_func(file_name='../img/dogo.jpeg') -> Image:
+    def dummy_file_func(file_name='img/dogo.jpeg') -> Image:
         # READS FILE
-        # test_image = Image.open(file_name)
-        test_image = Image.open('img/dogo.jpeg')
+        test_image = Image.open(file_name)
         return test_image
     
     def dummy_save_file_func(file_obj: Image, file_name: 'str' = 'test_dogo1.jpg'):
@@ -36,6 +34,7 @@ def engine_test():
     
     dummy_save_file_func(engine.apply_watermark(test_img))
     pass
+    
     
 if __name__ == '__main__':
     # func()
