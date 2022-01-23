@@ -1,27 +1,12 @@
 from PIL import Image, ImageDraw, UnidentifiedImageError
 from fonts import FontsLibrary
+from color_library import ColorLibrary
 
 
 class WatermarkEngine:
     def __init__(self):
         self.font_library = FontsLibrary()
-        self._color_list = {
-            # BLACK, WHITE, GRAY, RUBY, PINK, GRASS, PISTACHIO, ORANGE, BLUE, INDIGO, PURPLE, YELLOW, BEIGE, MUSTARD,
-            'BLACK': (0, 0, 0),
-            'WHITE': (255, 255, 255),
-            'GRAY': (127, 127, 127),
-            'RUBY': (191, 10, 48),
-            'PINK': (230, 0, 126),
-            'GRASS': (0, 154, 23),
-            'PISTACHIO': (180, 231, 183),
-            'ORANGE': (255, 123, 0),
-            'BLUE': (49, 99, 156),
-            'INDIGO': (0, 27, 148),
-            'PURPLE': (91, 10, 145),
-            'YELLOW': (255, 233, 0),
-            'BEIGE': (244, 226, 198),
-            'MUSTARD': (234, 170, 0)
-        }
+        self.color_library = ColorLibrary()
         self._img_obj = None
         self._marked_img_obj = None
         self._img_name = None  # path with filename in one str
@@ -137,7 +122,8 @@ class WatermarkEngine:
         # If File was converted to CMYK with PIL.Image.convert - converting int back to RGB will yield a good resold
         # Temporary solution is to convert image anyway, but this is something that has to be improved in the future
         # May LOG that file as something that needs to be checked after conversion
-        # TODO: Check if parameters passed are actually correct (font, font size, margins, font color, opacity, no "\n" characters)
+        # TODO: Check if parameters passed are actually correct
+        #  (font, font size, margins, .font color, opacity, no "\n" characters)
         # May be better solution would be to pre check some parameters before launching apply method
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
@@ -232,7 +218,7 @@ class WatermarkEngine:
         text_typist.text(
             self._watermark_placement,
             self.mark_text,
-            fill=(*self._color_list[self.color], self.opacity),
+            fill=(*self.color_library.get_rgb_color_value(self.color), self.opacity),
             anchor=self._anchor,
             font=font
         )
