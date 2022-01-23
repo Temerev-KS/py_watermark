@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image, ImageDraw, UnidentifiedImageError
 from fonts import FontsLibrary
 
 
@@ -141,14 +141,14 @@ class WatermarkEngine:
         # May be better solution would be to pre check some parameters before launching apply method
         # Or even better solution would be to check them on the fly as the parameters are being set
         # TODO: Check if watermark will fit into image width and specified margin
-
+    
         current_font = self.font_library.get_selected_font(self.font, self.font_size)
-        sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))  # TODO: This should be initiated once in the init
-        measure_image = ImageDraw.Draw(sample_image)  # TODO: This should be initiated once in the init
+        sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
+        measure_image = ImageDraw.Draw(sample_image)
         text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font, spacing=400)
-        text_width = text_bounding_box[2] - text_bounding_box[0]
-        text_height = text_bounding_box[3] - text_bounding_box[1]
-        if text_width + self.margin_horizontal > self._img_width or text_height > self._img_width + self.margin_horizontal:
+        text_width = text_bounding_box[2] - text_bounding_box[0] + self.margin_horizontal
+        text_height = text_bounding_box[3] - text_bounding_box[1] + self.margin_vertical
+        if text_width > self._img_width or text_height > self._img_width:
             print('watermark is too big')
             
         # And if it does not? What?
