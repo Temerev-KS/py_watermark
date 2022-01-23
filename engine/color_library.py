@@ -1,4 +1,5 @@
 class ColorLibrary:
+    """Class responsible for storing and returning color data for the watermark"""
     def __init__(self):
         self.rgb_colors = None
         self.load_rgb_colors()
