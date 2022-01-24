@@ -87,9 +87,7 @@ class WatermarkEngine:
         pass
     
     def parameters_reset(self):
-        """
-        Resets parameters to the "default" values.
-        """
+        """Resets parameters to the "default" values."""
         self.mark_text: str = "BIG BAD WOLF"
         self.font_size: int = 250
         self.font: str = 'Open Sans SemiBold'
@@ -103,13 +101,15 @@ class WatermarkEngine:
         self.across: bool = False
     
     def apply_watermark(self, image_obj: Image):
-        if image_obj is None:  # If we've been passed any object to work with - continue, else skip this one
+        # If we've been passed any object to work with - continue, else skip this one
+        if image_obj is None:
             pass
         else:
             self._img_obj = image_obj
             try:
                 self._gather_info()
-            except (FileNotFoundError, UnidentifiedImageError):  # If file not found or has unexpected format - skip
+            # If a file not found or has unexpected format - skip
+            except (FileNotFoundError, UnidentifiedImageError):
                 return
             self._check_values()
             self._calculate_placement()
@@ -126,17 +126,7 @@ class WatermarkEngine:
         #  (font, font size, margins, .font color, opacity, no "\n" characters)
         # May be better solution would be to pre check some parameters before launching apply method
         # Or even better solution would be to check them on the fly as the parameters are being set
-        # TODO: Check if watermark will fit into image width and specified margin
-    
-        # current_font = self.font_library.get_selected_font(self.font, self.font_size)
-        # sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
-        # measure_image = ImageDraw.Draw(sample_image)
-        # text_bounding_box = measure_image.textbbox((0, 0), self.mark_text, current_font)
-        # text_width = text_bounding_box[2] - text_bounding_box[0] + self.margin_horizontal
-        # text_height = text_bounding_box[3] - text_bounding_box[1] + self.margin_vertical
-        # if text_width > self._img_width or text_height > self._img_width:
-        #     print('watermark is too big')
-        
+       
         def check_watermark_fit():
             current_font = self.font_library.get_selected_font(self.font, self.font_size)
             sample_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
@@ -156,14 +146,8 @@ class WatermarkEngine:
                 print('Watermark is too big for that image')
         
         check_watermark_fit()
-            
-        # And if it does not? What?
         # Options: Skip it  |  Reduce the size of the watermark temporary for one file  |  Continue anyway  |
         # Continue and log it
-        
-        # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textbbox
-
-        pass
     
     def _gather_info(self):
         self._img_name = self._img_obj.filename
