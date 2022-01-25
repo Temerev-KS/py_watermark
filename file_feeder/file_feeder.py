@@ -35,7 +35,13 @@ if __name__ == '__main__':
         test_obj.feed_directory('C:\python_projects\py_watermark\img')
         for i in test_obj.images_file_path:
             print(i)
-    
+            
+    def test_without_subdir():
+        test_obj = FileFeeder()
+        test_obj.feed_directory('C:\python_projects\py_watermark\img', include_subfolders=False)
+        for i in test_obj.images_file_path:
+            print(i)
+
     def test_file():
         files = (
             'C:\python_projects\py_watermark\img\dogo_cmyk_af_ICC_discarded).jpeg',
@@ -48,4 +54,6 @@ if __name__ == '__main__':
             print(i)
         print(test_obj.images_file_path)
     
-    test_file()
+    # test_dir()
+    # test_without_subdir()
+    # test_file()
