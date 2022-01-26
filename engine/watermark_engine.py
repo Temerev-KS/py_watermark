@@ -8,6 +8,8 @@ class WatermarkEngine:
         self.font_library = FontsLibrary()
         self.color_library = ColorLibrary()
         self._img_obj = None
+        self._img_path = None
+        self._img_name = None
         self._marked_img_obj = None
         self._img_name = None  # path with filename in one str
         self._img_size = None
@@ -100,12 +102,12 @@ class WatermarkEngine:
         self.opacity: int = 125
         self.across: bool = False
     
-    def apply_watermark(self, image_obj: Image):
+    def apply_watermark(self, image_dict: {str: str}):
         # If we've been passed any object to work with - continue, else skip this one
-        if image_obj is None:
+        if image_dict is None:
             pass
         else:
-            self._img_obj = image_obj
+            self.open_img(image_dict)
             try:
                 self._gather_info()
             # If a file not found or has unexpected format - skip
@@ -115,6 +117,10 @@ class WatermarkEngine:
             self._calculate_placement()
             self._create_watermark()
             return self._output_result()
+        
+    def open_img(self, img_dict):
+        self._img_obj = Image.open(img_dict['path'])
+        self._img_name = img_dict['name']
     
     def _check_values(self):
         # TODO: Check if image has correct colorspace
@@ -229,9 +235,9 @@ class WatermarkEngine:
         appropriate_colorspace_img_obj = self._img_obj.convert('RGBA')
         self._marked_img_obj = Image.alpha_composite(appropriate_colorspace_img_obj, mark_image)
     
-    def _output_result(self) -> Image:
+    def _output_result(self) -> dict:
         final_rgb_image = self._marked_img_obj.convert('RGB')
-        return final_rgb_image
+        return {'image': final_rgb_image, 'file_name': self._img_name, 'path': self._img_path}
 
 
 if __name__ == '__main__':

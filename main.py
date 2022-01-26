@@ -1,10 +1,12 @@
 from PIL import Image
 from fonts import FontsLibrary
 from watermark_engine import WatermarkEngine
+from file_feeder import FileFeeder
 
 
 def func():
-    img = Image.open('img/dogo.jpeg')
+    img = Image.open(r'C:\\python_projects\\py_watermark\test_dogo1.jpg')
+    # img = Image.open('img/dogo.jpeg')
     print(img.format)
     print(img.size)
     print(img.mode)
@@ -34,11 +36,22 @@ def engine_test():
     
     dummy_save_file_func(engine.apply_watermark(test_img))
     pass
+
+
+def feed_and_process_test():
+    file_feeder = FileFeeder()
+    file_feeder.process_file(r'C:\python_projects\py_watermark\img\dogo.jpeg')
+    engine = WatermarkEngine()
+    for image in file_feeder.get_files():
+        final_image = engine.apply_watermark(image)
+        final_image['image'].show()
     
     
 if __name__ == '__main__':
     # func()
     # fonts_test()
-    engine_test()
+    # engine_test()
+    feed_and_process_test()
+    
     pass
     

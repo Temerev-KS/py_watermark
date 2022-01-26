@@ -37,8 +37,9 @@ class FileFeeder:
         else:
             image_file_path = Path(file)
             self._images_files_path.append(
-                {'name': image_file_path.name, 'path': str(image_file_path)}
+                {'name': image_file_path.name, 'path': str(image_file_path.resolve())}
             )
+            print(str(image_file_path.resolve()))
     
     def get_files(self):
         return self._images_files_path
