@@ -2,6 +2,7 @@ from PIL import Image
 from fonts import FontsLibrary
 from watermark_engine import WatermarkEngine
 from file_feeder import FileFeeder
+from exporter import Exporter
 
 
 def func():
@@ -47,11 +48,24 @@ def feed_and_process_test():
         final_image['image'].show()
     
     
+def full_cycle_test():
+    file_feeder = FileFeeder()
+    engine = WatermarkEngine()
+    exporter = Exporter()
+    exporter.set_params(same_as_source=False, destination=r'C:\python_projects\py_watermark\export_img')
+    file_feeder.process_directory(r'C:\python_projects\py_watermark\img')
+    for image in file_feeder.get_files():
+        final_image = engine.apply_watermark(image)
+        # final_image.show()
+        exporter.export_file(final_image)
+    
+
 if __name__ == '__main__':
     # func()
     # fonts_test()
     # engine_test()
-    feed_and_process_test()
+    # feed_and_process_test()
+    full_cycle_test()
     
     pass
     

@@ -11,7 +11,6 @@ class WatermarkEngine:
         self._img_path = None
         self._img_name = None
         self._marked_img_obj = None
-        self._img_name = None  # path with filename in one str
         self._img_size = None
         self._img_width = None
         self._img_height = None
@@ -156,7 +155,7 @@ class WatermarkEngine:
         # Continue and log it
     
     def _gather_info(self):
-        self._img_name = self._img_obj.filename
+        # self._img_name = self._img_obj.filename
         self._img_size = self._img_obj.size
         self._img_width = self._img_obj.width
         self._img_height = self._img_obj.height
