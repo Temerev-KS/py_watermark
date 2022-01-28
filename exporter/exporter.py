@@ -7,14 +7,17 @@ class Exporter:
         self._destination = None
         self._image = None
         self._destination_same_as_source = True
+        self._override_destination = False
     
-    def set_params(self, same_as_source: bool = True, destination: str = ''):
+    def set_params(self, same_as_source: bool = True, destination: str = '', override: bool = False):
         """
         :param same_as_source toggle option to save marked file in the same folder as an original image
         :param destination will be used as path to destination folder for saving marked files,
         but only if same_as_source is False, otherwise destination parameter will be ignored
+        :param override: will change filename of exported file if destination folder contains file with the same name
         """
         self._destination_same_as_source = same_as_source
+        self._override_destination = override
         if self._destination_same_as_source is False:
             if not Path(destination).exists():
                 Path(destination).mkdir()
@@ -30,5 +33,15 @@ class Exporter:
         if self._destination_same_as_source:
             self._destination = image_dict['path']
         export_path = Path(PurePath(self._destination).joinpath(self._name))
-        self._image.save(export_path)
-# TODO: Create toggle to override existing files
+        if export_path.exists() and self._override_destination is False:
+            def file_name_index(index: int = 0):
+                name_index = index + 1
+                new_file_name = PurePath(self._name).stem + f'_marked_{name_index:03}' + PurePath(self._name).suffix
+                new_export_path = Path(PurePath(self._destination).joinpath(new_file_name))
+                if Path(new_export_path).exists():
+                    file_name_index(name_index)
+                else:
+                    self._image.save(new_export_path)
+            file_name_index()
+        else:
+            self._image.save(export_path)
