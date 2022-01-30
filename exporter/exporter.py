@@ -1,4 +1,3 @@
-import re
 from pathlib import Path, PurePath
 
 
@@ -46,13 +45,4 @@ class Exporter:
             file_name_index()
         else:
             self._image.save(export_path)
-
-
-# TODO: Figure out if regex file name index matching is even necessary
-def regex_search():
-    pattern = r'(.*?)_marked_([0-9]+)(\.\w{2,4})$'
-    file_name = "picture_marked_888888.jpeg"
-    print('Name ' + re.search(pattern, file_name).group(1))
-    print('Index ' + re.search(pattern, file_name).group(2))
-    print('Suffix ' + re.search(pattern, file_name).group(3))
     
